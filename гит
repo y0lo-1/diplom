@@ -1,0 +1,13 @@
+# Идём в склонированный репозиторий
+cd ~/turtlebro-diploma
+
+# Сохраняем папку .git (с историей)
+# Удаляем всё остальное содержимое
+find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+
+# Копируем новые файлы из workspace
+cp -r ~/turtlebro_ws/src/* .
+cp -r ~/turtlebro_ws/src/.[!.]* . 2>/dev/null || true
+
+# Проверяем, что получилось
+ls -la
