@@ -112,3 +112,25 @@ colcon list
 
 
 colcon build --symlink-install
+
+
+mkdir -p ~/turtlebro_ws/src/turtlebro-diploma/turtlebro_description/rviz
+touch ~/turtlebro_ws/src/turtlebro-diploma/turtlebro_description/rviz/.gitkeep
+
+grep -n "install" ~/turtlebro_ws/src/turtlebro-diploma/turtlebro_description/CMakeLists.txt
+
+
+ls ~/turtlebro_ws/src/turtlebro-diploma/turtlebro_description/
+
+cd ~/turtlebro_ws/src/turtlebro-diploma/turtlebro_description/
+# Создай папки, которые CMakeLists ожидает, но которых нет
+mkdir -p launch rviz urdf meshes config worlds
+# Если какие-то пустые — положи в них .gitkeep
+find . -type d -empty -exec touch {}/.gitkeep \;
+
+
+cd ~/turtlebro_ws
+rm -rf build/ install/ log/
+source /opt/ros/jazzy/setup.bash
+colcon build --symlink-install
+
