@@ -1,0 +1,31 @@
+Решение (по приоритету):
+sudo apt update
+sudo apt install python3-ament-package python3-colcon-common-extensions python3-rosdep ros-dev-tools
+Это правильный способ — поставить через apt, а не через pip. После этого:
+cd ~/turtlebro_ws
+rm -rf build/ install/ log/
+source /opt/ros/jazzy/setup.bash
+colcon build --symlink-install
+Проверка, что модуль теперь виден Python:
+python3 -c "import ament_package; print(ament_package.__file__)"
+Должно вывести путь типа /usr/lib/python3/dist-packages/ament_package/__init__.py. Если выводит — всё, сборка пройдёт.
+Если после установки apt-пакета ошибка осталась, значит твой python3 указывает не туда. Проверь:
+
+which python3
+python3 --version
+ls /usr/lib/python3/dist-packages/ | grep ament
+На 24.04 должно быть python3 → /usr/bin/python3.12, и в dist-packages должны лежать ament_package, ament_index_python, colcon_* и т.д.
+Почему так получилось: в твоём логе видно, что turtlebro_control и turtlebro_experiments собрались (это ament_python, им хватает базового Python), а упали именно turtlebro_slam, turtlebro_navigation, turtlebro_description — все ament_cmake. Они через find_package(ament_cmake) тянут CMake-скрипты, которые на этапе конфигурации запускают templates_2_cmake.py, и вот ему-то и не хватает ament_package. Это однозначно говорит, что ros-dev-tools или python3-ament-package не были доустановлены при инсталляции ROS 2.
+Дополнительно стоит сразу поставить, раз делаешь свежую систему:
+sudo apt install -y \
+    ros-jazzy-slam-toolbox \
+    ros-jazzy-navigation2 \
+    ros-jazzy-nav2-bringup \
+    ros-jazzy-xacro \
+    ros-jazzy-robot-localization \
+    ros-jazzy-joint-state-publisher \
+    ros-jazzy-joint-state-publisher-gui \
+    ros-jazzy-robot-state-publisher \
+    ros-jazzy-rviz2 \
+    liburdfdom-tools
+Это аналог того набора, что мы ставили под Humble, но под Jazzy. После — повтори colcon build --symlink-install. Дай знать, что покажет python3 -c "import ament_package" — это диагностический ключ.
