@@ -1,0 +1,79 @@
+Хорошо, после установки ros-jazzy-rplidar-ros на роботе следующие шаги такие.
+Шаг 1. Установить драйвер на роботе:
+
+sudo apt update
+sudo apt install ros-jazzy-rplidar-ros
+
+
+Шаг 2. Найти, к какому порту подключён лидар:
+
+ls /dev/ttyUSB*
+
+
+Если видишь /dev/ttyUSB0 — это он. Если несколько (ttyUSB0, ttyUSB1) — отключи лидар физически, снова ls /dev/ttyUSB*, посмотри, какой исчез. Подключи обратно — это и есть он.
+Шаг 3. Дать пользователю pi права на serial-порт навсегда:
+
+sudo usermod -a -G dialout pi
+
+
+После этого обязательно перезагрузи робота или сделай logout → login через SSH, иначе группа не применится.
+Шаг 4. Проверить, что драйвер запускается отдельно от всего:
+
+source /opt/ros/jazzy/setup.bash
+ros2 launch rplidar_ros rplidar_a1_launch.py
+
+
+Лидар должен начать жужжать (вращаться). В терминале должны идти логи без ошибок.
+В соседнем терминале на роботе:
+
+source /opt/ros/jazzy/setup.bash
+ros2 topic list
+ros2 topic echo /scan --once
+
+
+Должен быть топик /scan и в нём массив ranges из ~360 значений. Если есть — лидар работает.
+Шаг 5. Перенести исходники проекта с ноутбука на робота.
+На ноутбуке у тебя уже почищенный от Gazebo workspace. На роботе его ещё нет (или есть старая версия). Самый простой способ — rsync по сети:
+С ноутбука (зная IP робота, например 192.168.1.50):
+
+rsync -avz --delete \
+  --exclude='build/' --exclude='install/' --exclude='log/' \
+  ~/turtlebro_ws/src/ pi@192.168.1.50:/home/pi/turtlebro_ws/src/
+
+
+Это скопирует только исходники, без папок сборки (их нельзя копировать — там бинарники под amd64, на arm64 не заработают). Команду запускаешь на ноутбуке, она отправит файлы на робота.
+Если SSH ещё не настроен — спросит пароль pi.
+Шаг 6. Поставить зависимости проекта на роботе.
+На роботе:
+
+sudo apt install -y \
+    ros-jazzy-slam-toolbox \
+    ros-jazzy-navigation2 \
+    ros-jazzy-nav2-bringup \
+    ros-jazzy-xacro \
+    ros-jazzy-robot-localization \
+    ros-jazzy-joint-state-publisher \
+    ros-jazzy-robot-state-publisher \
+    ros-jazzy-rplidar-ros \
+    liburdfdom-tools
+
+
+joint-state-publisher-gui и rviz2 на роботе не нужны — он работает без графики.
+Шаг 7. Собрать workspace на роботе:
+
+cd ~/turtlebro_ws
+rm -rf build/ install/ log/
+source /opt/ros/jazzy/setup.bash
+colcon build --symlink-install
+echo "source ~/turtlebro_ws/install/setup.bash" >> ~/.bashrc
+source ~/.bashrc
+
+
+Шаг 8. Решить, где будет запускаться какая часть.
+Тут есть архитектурный выбор:​​​​​​​​​​​​​​​​
+
+Вопрос забыл написать — он простой: где запускать SLAM и навигацию — на самом TurtleBro или на ноутбуке через сеть?
+Краткая суть выбора:
+Вариант А — всё на роботе. Драйверы (моторы, лидар, IMU) + SLAM + Nav2 + bringup.launch.py — всё на Raspberry Pi внутри робота. Ноутбук используется только для запуска RViz и команд (ros2 topic, ros2 launch). Плюсы: автономность, всё в одном месте, нет проблем с сетью. Минусы: Raspberry Pi слабее ноутбука, slam_toolbox с большой картой будет тормозить, CPU может не справляться.
+Вариант Б — распределённый. Драйверы (моторы, лидар) запускаются на роботе. SLAM и Nav2 — на ноутбуке. Они общаются через DDS по Wi-Fi. Плюсы: ноутбук мощнее, всё считает быстрее, RViz прямо на той же машине, где SLAM. Минусы: задержка сети, нужно настроить ROS_DOMAIN_ID одинаковым на обеих машинах и проверить, что Wi-Fi видит multicast. На дипломе с RPLIDAR A1 и небольшой картой это обычно работает нормально.
+Какой выбираешь? От этого зависит, надо ли копировать весь workspace на робота, или только пакет с драйверами.​​​​​​​​​​​​​​​​
