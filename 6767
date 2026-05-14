@@ -87,3 +87,28 @@ echo "--- extra ---"
 ls ~/turtlebro_ws/src/turtlebro_extra/
 echo "--- web ---"
 ls ~/turtlebro_ws/src/turtlebro_web/
+
+
+mkdir -p ~/turtlebro_ws/src/turtlebro-diploma/turtlebro_description/launch
+touch ~/turtlebro_ws/src/turtlebro-diploma/turtlebro_description/launch/.gitkeep
+
+# Веб-интерфейс — не нужен
+touch ~/turtlebro_ws/src/turtlebro_web/COLCON_IGNORE
+
+# Демо-сценарии — не нужны
+touch ~/turtlebro_ws/src/turtlebro_extra/turtlebro_demo/COLCON_IGNORE
+
+# Actions — если твоя навигация их не использует, отключаем
+touch ~/turtlebro_ws/src/turtlebro_extra/turtlebro_actions/COLCON_IGNORE
+
+# turtlebro_py — обычно вспомогательные скрипты, можно отключить
+touch ~/turtlebro_ws/src/turtlebro_extra/turtlebro_py/COLCON_IGNORE
+
+
+cd ~/turtlebro_ws
+rm -rf build/ install/ log/
+source /opt/ros/jazzy/setup.bash
+colcon list
+
+
+colcon build --symlink-install
