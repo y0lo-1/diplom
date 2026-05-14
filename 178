@@ -1,0 +1,23 @@
+# 1. Какая система и архитектура
+cat /etc/os-release
+uname -a
+
+# 2. Какая версия ROS уже установлена
+ls /opt/ros/
+echo "ROS_DISTRO: $ROS_DISTRO"
+
+# 3. Есть ли workspace
+ls ~/
+ls ~/catkin_ws/src 2>/dev/null
+ls ~/turtlebro_ws/src 2>/dev/null
+ls ~/ros2_ws/src 2>/dev/null
+
+# 4. Что запускается при старте системы
+systemctl list-units --type=service --state=running | grep -i turtle
+systemctl list-unit-files | grep -i turtle
+
+# 5. История команд — что тут раньше делали
+tail -40 ~/.bash_history
+
+# 6. Что внутри bringup, который мы видели в названии вкладки в браузере
+find / -name "bringup.launch*" 2>/dev/null
