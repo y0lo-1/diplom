@@ -50,3 +50,12 @@ sudo apt update
 
 
 sudo apt install python3-ament-package python3-colcon-common-extensions python3-rosdep ros-dev-tools
+
+
+python3 -c "import ament_package; print(ament_package.__file__)"
+
+
+cd ~/turtlebro_ws
+rm -rf build/ install/ log/
+source /opt/ros/jazzy/setup.bash
+colcon build --symlink-install
