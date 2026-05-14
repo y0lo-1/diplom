@@ -1,0 +1,102 @@
+Принято. Удаляем gazebo подчистую из всех трёх launch-файлов и gazebo.launch.py целиком. Пошагово.
+Шаг 1. Удаляем сам файл с запуском Gazebo:
+
+rm ~/turtlebro_ws/src/turtlebro_description/launch/gazebo.launch.py
+
+
+Также удалим headless-версию, если есть:
+
+rm ~/turtlebro_ws/src/turtlebro_description/launch/gazebo_headless.launch.py 2>/dev/null
+
+
+Шаг 2. Чистим bringup.launch.py:
+
+nano ~/turtlebro_ws/src/turtlebro_bringup/launch/bringup.launch.py
+
+
+Тебе надо найти и удалить три блока:
+Блок A — определение gazebo_normal (строки ~44-47):
+
+gazebo_normal = IncludeLaunchDescription(
+    PythonLaunchDescriptionSource(
+        os.path.join(pkg_description, 'launch', 'gazebo.launch.py')),
+    ...
+)
+
+
+Блок B — определение gazebo_headless (строки ~50-53):
+
+gazebo_headless = IncludeLaunchDescription(
+    PythonLaunchDescriptionSource(
+        os.path.join(pkg_description, 'launch', 'gazebo_headless.launch.py')),
+    ...
+)
+
+
+Блок C — в самом низу файла, в LaunchDescription([...]) (строки ~155-156):
+
+gazebo_normal,
+gazebo_headless,
+
+
+Эти две строки удали из итогового списка.
+Также, если в начале файла есть launch-аргумент headless (DeclareLaunchArgument для headless-режима gazebo) — его тоже убери, он теперь ничего не делает.
+Дополнительно проверь параметр use_sim_time: найди все его упоминания в bringup.launch.py и поставь в 'false' (на физическом роботе нужно реальное время, а не симуляционное).
+Сохрани: Ctrl+O, Enter, Ctrl+X.
+Шаг 3. Чистим experiment_navigation.launch.py:
+
+nano ~/turtlebro_ws/src/turtlebro_experiments/launch/experiment_navigation.launch.py
+
+
+Удали:
+	•	Строку 4 с комментарием # Запускает напрямую: gazebo, navigation, rviz, recorder — поправь на # Запускает напрямую: navigation, rviz, recorder
+	•	Блок gazebo = IncludeLaunchDescription(...) (строки ~37-40)
+	•	Строку gazebo, в финальном LaunchDescription([...]) (строка 94)
+Также проверь use_sim_time — поставь в 'false'.
+Сохрани.
+Шаг 4. Чистим package.xml пакета turtlebro_description:
+
+nano ~/turtlebro_ws/src/turtlebro_description/package.xml
+
+
+Найди и удали (если есть):
+
+<exec_depend>gazebo_ros</exec_depend>
+<depend>gazebo_ros</depend>
+<exec_depend>gazebo_ros_pkgs</exec_depend>
+
+
+Шаг 5. Поправь turtlebro.urdf.xacro:
+
+nano ~/turtlebro_ws/src/turtlebro_description/urdf/turtlebro.urdf.xacro
+
+
+Найди строку:
+
+<xacro:include filename="$(find turtlebro_description)/urdf/turtlebro.gazebo.xacro"/>
+
+
+Удали её (gazebo.xacro мы тоже удаляли в прошлый раз).
+Шаг 6. Удаляем сам turtlebro.gazebo.xacro, если ещё не удалён:
+
+rm ~/turtlebro_ws/src/turtlebro_description/urdf/turtlebro.gazebo.xacro 2>/dev/null
+
+
+Шаг 7. Проверка — упоминания gazebo должны исчезнуть полностью:
+
+grep -rn "gazebo" ~/turtlebro_ws/src/
+
+
+Должно вывести пусто (или максимум комментарий, который ты решил оставить).
+Шаг 8. Пересборка:
+
+cd ~/turtlebro_ws
+rm -rf build/ install/ log/
+colcon build --symlink-install
+
+
+Пришли результат grep -rn "gazebo" ~/turtlebro_ws/src/ после правок и итог сборки — посмотрим, чисто ли получилось.
+Что будет дальше (предупреждение). После успешной сборки запустить bringup.launch.py сразу не получится — он раньше брал данные с симулятора (одометрия, /scan, /imu), а теперь эти топики никто не публикует. На физическом роботе их публикуют драйверы железа TurtleBro: моторный контроллер, лидар, IMU. Нужно понять:
+	1.	Какие ROS-пакеты-драйверы есть у твоего TurtleBro — производитель давал репозиторий или образ?
+	2.	Под какой ROS они написаны (Foxy / Humble / Jazzy)?
+Если драйверы только под Humble и в виде бинарников — на Jazzy они не заработают, и это будет настоящий блокер. Если в исходниках — можно попробовать пересобрать под Jazzy. Узнай это до того, как начнёшь возиться с навигацией и SLAM на железе.​​​​​​​​​​​​​​​​
