@@ -3,3 +3,38 @@ sudo apt install liburdfdom-tools
 xacro ~/turtlebro_ws/src/turtlebro-diploma/turtlebro_description/urdf/turtlebro.urdf.xacro > /tmp/turtlebro.urdf
 urdf_to_graphiz /tmp/turtlebro.urdf
 Создаст PDF с деревом звеньев/суставов → скриншот. (Альтернатива — дерево TF: ros2 run tf2_tools view_frames, даёт frames.pdf.)
+
+
+xacro ~/turtlebro_ws/src/turtlebro-diploma/turtlebro_description/urdf/turtlebro.urdf.xacro > /tmp/turtlebro.urdf
+urdf_to_graphiz /tmp/turtlebro.urdf
+Traceback (most recent call last):
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/xacro/__init__.py", line 1026, in parse
+    inp = f = open(os.path.join(root_dir, filename))
+FileNotFoundError: [Errno 2] No such file or directory: '/home/vboxuser/turtlebro_ws/src/turtlebro-diploma/turtlebro_description/urdf/turtlebro.urdf.xacro'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/xacro/__init__.py", line 1138, in _process
+    doc = process_file(input_file_name, **opts)
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/xacro/__init__.py", line 1110, in process_file
+    doc = parse(None, input_file_name)
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/xacro/__init__.py", line 1030, in parse
+    raise XacroException(e.strerror + ": " + e.filename, exc=e)
+xacro.XacroException: No such file or directory: /home/vboxuser/turtlebro_ws/src/turtlebro-diploma/turtlebro_description/urdf/turtlebro.urdf.xacro [Errno 2] No such file or directory: '/home/vboxuser/turtlebro_ws/src/turtlebro-diploma/turtlebro_description/urdf/turtlebro.urdf.xacro'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/opt/ros/humble/bin/xacro", line 33, in <module>
+    sys.exit(load_entry_point('xacro==2.1.1', 'console_scripts', 'xacro')())
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/xacro/__init__.py", line 1190, in main
+    _process(input_file_name, vars(opts))
+  File "/opt/ros/humble/local/lib/python3.10/dist-packages/xacro/__init__.py", line 1143, in _process
+    except xml.parsers.expat.ExpatError as e:
+AttributeError: module 'xml' has no attribute 'parsers'
+WARNING: The executable named 'urdf_to_graphiz' is deprecated. Use 'urdf_to_graphviz' instead.
+WARNING: OUTPUT not given. This type of usage is deprecated!Usage: urdf_to_graphviz input.xml [OUTPUT]  Will create either $ROBOT_NAME.gv & $ROBOT_NAME.pdf in CWD  or OUTPUT.gv & OUTPUT.pdf.
+Error:   Error document empty.
+         at line 100 in ./urdf_parser/src/model.cpp
+ERROR: Model Parsing the xml failed
