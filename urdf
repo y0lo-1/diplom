@@ -38,3 +38,11 @@ WARNING: OUTPUT not given. This type of usage is deprecated!Usage: urdf_to_graph
 Error:   Error document empty.
          at line 100 in ./urdf_parser/src/model.cpp
 ERROR: Model Parsing the xml failed
+
+find ~/turtlebro_ws/src -name "*.urdf.xacro" -o -name "*.urdf" -o -name "*.xacro"
+
+xacro ~/ПРАВИЛЬНЫЙ_ПУТЬ/turtlebro.urdf.xacro > /tmp/turtlebro.urdf
+urdf_to_graphviz /tmp/turtlebro.urdf turtlebro_model
+
+xacro ~/turtlebro_ws/src/.../turtlebro.urdf.xacro > /tmp/turtlebro.urdf
+urdf_to_graphiz /tmp/turtlebro.urdf
