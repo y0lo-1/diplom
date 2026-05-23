@@ -1,0 +1,5 @@
+Рисунок 3.2 — URDF-структура модели. Сгенерируй дерево связей из твоего xacro:
+sudo apt install liburdfdom-tools
+xacro ~/turtlebro_ws/src/turtlebro-diploma/turtlebro_description/urdf/turtlebro.urdf.xacro > /tmp/turtlebro.urdf
+urdf_to_graphiz /tmp/turtlebro.urdf
+Создаст PDF с деревом звеньев/суставов → скриншот. (Альтернатива — дерево TF: ros2 run tf2_tools view_frames, даёт frames.pdf.)
