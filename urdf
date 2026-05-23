@@ -46,3 +46,8 @@ urdf_to_graphviz /tmp/turtlebro.urdf turtlebro_model
 
 xacro ~/turtlebro_ws/src/.../turtlebro.urdf.xacro > /tmp/turtlebro.urdf
 urdf_to_graphiz /tmp/turtlebro.urdf
+
+
+cd ~
+xacro ~/turtlebro_ws/src/turtlebro_description/urdf/turtlebro.urdf.xacro > /tmp/turtlebro.urdf
+urdf_to_graphviz /tmp/turtlebro.urdf turtlebro_model
